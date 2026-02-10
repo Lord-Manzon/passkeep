@@ -32,6 +32,10 @@ Passkeeper is a Flutter-based password manager that allows you to store, edit, a
    - Switch between **All, Social, Games, Work** tabs.
    - Each tab shows a badge count of how many passwords are stored in that category.
 
+## Download
+
+Get the app from my [releases page](https://github.com/Lord-Manzon/passkeep/releases/tag/v1.0.0).
+
 ## Running on PC / Emulator
 
 1. Clone the repository:
