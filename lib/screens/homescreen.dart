@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '/modals/add_password_sheet.dart';
-import 'package:flutter/services.dart'; // Clipboard
+import 'package:flutter/services.dart'; //cclipboard
 
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
@@ -11,16 +11,25 @@ class Homescreen extends StatefulWidget {
 
 class _HomescreenState extends State<Homescreen> {
   List<Map<String, String>> _passwords = [];
+  TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
 
-  // Filter passwords by category
-  List<Map<String, String>> getPasswordsForCategory(String category) {
-    if (category == "All") return _passwords;
-    return _passwords.where((p) => p["category"] == category).toList();
+  @override
+  void initState() {
+    super.initState();
+
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.toLowerCase();
+      });
+    });
   }
 
-  // Build ListView for a category
+  // Build a ListView for category tabs
   Widget _buildPasswordList(String category) {
-    final filtered = getPasswordsForCategory(category);
+    final filtered = _passwords
+        .where((p) => p["category"] == category)
+        .toList();
 
     if (filtered.isEmpty) {
       return const Center(
@@ -34,11 +43,11 @@ class _HomescreenState extends State<Homescreen> {
         final item = filtered[index];
         return ListTile(
           title: Text(
-            item["title"] ?? "",
+            item["title"]!,
             style: const TextStyle(color: Colors.white),
           ),
           subtitle: Text(
-            item["username"] ?? "",
+            item["username"]!,
             style: const TextStyle(color: Colors.grey),
           ),
           trailing: IconButton(
@@ -51,7 +60,6 @@ class _HomescreenState extends State<Homescreen> {
             },
           ),
           onTap: () async {
-            // Open modal to edit the password
             final updated = await showModalBottomSheet<Map<String, String>>(
               context: context,
               isScrollControlled: true,
@@ -64,7 +72,65 @@ class _HomescreenState extends State<Homescreen> {
 
             if (updated != null) {
               setState(() {
-                // Update original item in _passwords
+                final originalIndex = _passwords.indexOf(item);
+                _passwords[originalIndex] = updated;
+              });
+            }
+          },
+        );
+      },
+    );
+  }
+
+  // Build ListView for All tab with search
+  Widget _buildAllPasswords() {
+    final filtered = _passwords.where((p) {
+      final query = _searchQuery.toLowerCase();
+      return (p["title"] ?? "").toLowerCase().contains(query) ||
+          (p["username"] ?? "").toLowerCase().contains(query);
+    }).toList();
+
+    if (filtered.isEmpty) {
+      return const Center(
+        child: Text("No passwords", style: TextStyle(color: Colors.grey)),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: filtered.length,
+      itemBuilder: (context, index) {
+        final item = filtered[index];
+        return ListTile(
+          title: Text(
+            item["title"]!,
+            style: const TextStyle(color: Colors.white),
+          ),
+          subtitle: Text(
+            item["username"]!,
+            style: const TextStyle(color: Colors.grey),
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.copy, color: Colors.white),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: item["password"] ?? ""));
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text("Password copied")));
+            },
+          ),
+          onTap: () async {
+            final updated = await showModalBottomSheet<Map<String, String>>(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: const Color(0xFF1F1F1F),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              builder: (_) => AddPasswordSheet(initialData: item),
+            );
+
+            if (updated != null) {
+              setState(() {
                 final originalIndex = _passwords.indexOf(item);
                 _passwords[originalIndex] = updated;
               });
@@ -98,6 +164,7 @@ class _HomescreenState extends State<Homescreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: TextField(
+                controller: _searchController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFF282828),
@@ -141,7 +208,7 @@ class _HomescreenState extends State<Homescreen> {
             Expanded(
               child: TabBarView(
                 children: [
-                  _buildPasswordList("All"),
+                  _buildAllPasswords(),
                   _buildPasswordList("Social"),
                   _buildPasswordList("Games"),
                   _buildPasswordList("Work"),
