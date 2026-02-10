@@ -36,10 +36,13 @@ Passkeeper is a Flutter-based password manager that allows you to store, edit, a
 
 1. Clone the repository:
    ```bash
-   git clone <your-repo-url>
+   git clone <https://github.com/Lord-Manzon/passkeep.git>
    ```
 2. Navigate to the project folder:
+
+```bash
    cd passkeeper
+```
 
 3. Get dependencies:
    flutter pub get
