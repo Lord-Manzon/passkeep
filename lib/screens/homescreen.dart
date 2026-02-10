@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/modals/add_password_sheet.dart';
 
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
@@ -11,8 +12,7 @@ class _HomescreenState extends State<Homescreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5, // number of categories
-
+      length: 4, // number of categories
       child: Scaffold(
         backgroundColor: const Color(0xFF121212),
         appBar: AppBar(
@@ -108,6 +108,23 @@ class _HomescreenState extends State<Homescreen> {
               ),
             ),
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          elevation: 0,
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: const Color(0xFF1F1F1F),
+              isScrollControlled: true,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              builder: (_) => const AddPasswordSheet(),
+            );
+          },
+
+          backgroundColor: const Color(0xFFEE6AF3),
+          child: const Icon(Icons.add, color: Colors.black),
         ),
       ),
     );
